@@ -1,41 +1,42 @@
-version: "3.8"
-
 services:
   mysqldb:
     image: mysql:8
-    container_name: mysqldb
-    restart: always
+    container_name: mysql-db
     environment:
       MYSQL_ROOT_PASSWORD: exam
+
       MYSQL_DATABASE: coursedb
     ports:
       - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
     networks:
-      - fullstack-net
+      - springboot-mysql-net
 
   backend:
-    build: ./backend
-    container_name: backend
-    restart: always
+    image: jayanithb/2300031535-final-backend1:latest
+    container_name: springboot
+    ports:
+      - "30032:2000"
     depends_on:
       - mysqldb
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/coursedb
-
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: exam
-    ports:
-      - "30032:2000"        # backend visible on host at 30032
+    restart: on-failure
     networks:
-      - fullstack-net
+      - springboot-mysql-net
 
   frontend:
-    build: ./frontend
-    container_name: frontend
-    restart: always
+    image: jayanithb/2300031535-final-frontend1:latest
+    container_name: react
+    ports:
+      - "30031:80"
     depends_on:
       - backend
-    ports:
-      - "30031:80"          # frontend visible on host at 30031
+    restart: on-failure
     networks:
-      - fullstack-net
+      - springboot-mysql-net
+
+volumes:
+  mysql_data:
+
+networks:
+  springboot-mysql-net:
